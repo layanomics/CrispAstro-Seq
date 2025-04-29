@@ -1,0 +1,85 @@
+# ------------------------------------------------------------------------------
+# CrispAstro-Seq Git Ignore File
+# Protects the repo from uploading unnecessary and heavy files
+# ------------------------------------------------------------------------------
+
+# -----------------------------
+# Python / Jupyter artifacts
+# -----------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+.vscode/
+*.env
+.venv/
+*.log
+*.tmp
+
+# -----------------------------
+# Operating system junk files
+# -----------------------------
+.DS_Store
+Thumbs.db
+
+# -----------------------------
+# Conda environments
+# -----------------------------
+*.conda
+*.env
+*.yml~
+env/
+.conda/
+
+# -----------------------------
+# Bioinformatics: Large data folders
+# (Prevent uploading FASTQs, BAMs, GTFs, etc.)
+# -----------------------------
+00_data/raw/
+00_data/trimmed/
+00_data/aligned/
+00_data/counts/
+00_data/reference/
+00_data/metadata/
+
+# -----------------------------
+# Alignment / Mapping results
+# -----------------------------
+*.sam
+*.bam
+*.bai
+*.bed
+
+# -----------------------------
+# Quantification results
+# -----------------------------
+*.gtf
+*.gff
+*.count
+
+# -----------------------------
+# Other result files to ignore (optional if too big)
+# -----------------------------
+01_qc/results/
+02_preprocessing/results/
+03_alignment/results/
+04_quantification/results/
+05_differential_expression/results/
+06_enrichment_analysis/results/
+07_visualization/figures/
+
+# -----------------------------
+# Miscellaneous
+# -----------------------------
+*.zip
+*.tar
+*.tar.gz
+*.gz
+*.bz2
+*.fastq
+*.fastq.gz
+
+# -----------------------------
+# Ignore environment files you will recreate
+# -----------------------------
+environment/conda_environment.yml~
