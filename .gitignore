@@ -68,6 +68,10 @@ env/
 06_enrichment_analysis/results/
 07_visualization/figures/
 
+# FastQC output reports
+*_fastqc.html
+*_fastqc.zip
+
 # -----------------------------
 # Miscellaneous
 # -----------------------------
