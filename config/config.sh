@@ -36,7 +36,7 @@ STAR_INDEX_DIR="$REFERENCE_DIR/star_index"
 # ------------- General Parameters -------------
 
 # Number of threads for tools like STAR, FastQC, etc.
-THREADS=8
+THREADS=12
 
 # Other parameters (example: minimum read length after trimming)
 MIN_LENGTH=30
