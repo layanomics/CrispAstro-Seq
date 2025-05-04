@@ -60,8 +60,10 @@ env/
 # -----------------------------
 # Other result files to ignore (optional if too big)
 # -----------------------------
-01_qc/results/
-02_preprocessing/results/
+# Ignore raw multiqc data
+01_preprocessing/results/multiqc_data/
+01_preprocessing/results/*_plot*.txt
+01_preprocessing/results/*_plot*.png
 03_alignment/results/
 04_quantification/results/
 05_differential_expression/results/
