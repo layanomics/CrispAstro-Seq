@@ -76,6 +76,8 @@ env/
 # fastp reports
 *_fastp.html
 *_fastp.json
+01_preprocessing/results/multiqc/multiqc_data/
+
 # -----------------------------
 # Miscellaneous
 # -----------------------------
