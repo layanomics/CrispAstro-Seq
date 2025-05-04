@@ -71,7 +71,9 @@ env/
 # FastQC output reports
 *_fastqc.html
 *_fastqc.zip
-
+# fastp reports
+*_fastp.html
+*_fastp.json
 # -----------------------------
 # Miscellaneous
 # -----------------------------
