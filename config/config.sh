@@ -15,7 +15,7 @@ REFERENCE_DIR="$PROJECT_DIR/00_data/reference"
 METADATA_DIR="$PROJECT_DIR/00_data/metadata"
 
 # QC and visualization results
-QC_DIR="$PROJECT_DIR/01_qc/results"
+QC_DIR="$PROJECT_DIR/01_preprocessing/results"
 VISUALIZATION_DIR="$PROJECT_DIR/07_visualization/figures"
 
 # Configs and environment
