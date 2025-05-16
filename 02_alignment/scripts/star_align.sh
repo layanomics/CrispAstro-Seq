@@ -1,51 +1,69 @@
 #!/bin/bash
+# run_star_align.sh — Aligns trimmed FASTQ reads using STAR
 
-# ---------- CONFIG ----------
-SCRIPT_DIR="$(dirname "$(realpath "$0")")"
-source "$SCRIPT_DIR/../../config/config.sh"
+# =============================
+# 1. Load Configuration
+# =============================
+# shellcheck disable=SC1090
+source ~/CrispAstro-Seq/config/config.sh
 
-# Detect if running on the VM and override THREADS accordingly
-if [[ "$(hostname)" == "star-indexer" ]]; then
-    THREADS=$(nproc) # Use all available VM threads
-    echo "⭐ Running on VM: Using $THREADS threads."
-else
-    echo "💻 Running on local machine: Using $THREADS threads from config."
-fi
+# Start time tracking
+START_TIME=$(date +%s)
 
-# ---------- LOG SETUP ----------
-LOG_DIR="$SCRIPT_DIR/../../logs"
-mkdir -p "$LOG_DIR"
-LOG_FILE="$LOG_DIR/star_align_$(date +%Y%m%d_%H%M%S).log"
+# Override parallel logic for STAR alignment
+MAX_JOBS=1
+THREADS_PER_JOB=$THREADS
 
-echo "🚀 Starting STAR Alignment at $(date)"
-echo "Logging to: $LOG_FILE"
-start_time=$(date +%s)
+echo -e "\n⚙️ STAR override:"
+echo "  - MAX_JOBS (STAR Align)  : $MAX_JOBS"
+echo "  - THREADS_PER_JOB        : $THREADS_PER_JOB"
 
-# ---------- ALIGNMENT ----------
-mkdir -p "$ALIGN_DIR"
+mkdir -p "$ALIGN_DIR" "$LOG_DIR"
 
-for R1_FILE in "$TRIMMED_DIR"/*_R1.fastq.gz; do
-    SAMPLE=$(basename "$R1_FILE" | sed 's/_R1\.fastq\.gz//')
-    R2_FILE="$TRIMMED_DIR/${SAMPLE}_R2.fastq.gz"
+# =============================
+# 2. Sample Loop
+# =============================
 
-    echo "🧬 Processing Sample: $SAMPLE" | tee -a "$LOG_FILE"
+CURRENT_JOBS=0
+for r1 in "$TRIMMED_DIR"/*/*_clean_R1.fastq.gz; do
+    sample=$(basename "$r1" | cut -d'_' -f1)
+    r2="$TRIMMED_DIR/$sample/${sample}_clean_R2.fastq.gz"
 
-    STAR --runThreadN "$THREADS" \
+    if [[ ! -f "$r2" || ! -s "$r1" || ! -s "$r2" ]]; then
+        echo "❌ Skipping $sample — missing or empty reads" | tee -a "$LOG_DIR/star_align_errors.log"
+        continue
+    fi
+
+    echo "[$(date +'%F %T')] STAR alignment for $sample..."
+
+    SAMPLE_OUT_DIR="$ALIGN_DIR/$sample"
+    mkdir -p "$SAMPLE_OUT_DIR"
+    LOG_FILE="$LOG_DIR/star_align_${sample}.log"
+
+    STAR \
+        --runThreadN "$THREADS_PER_JOB" \
         --genomeDir "$STAR_INDEX_DIR" \
-        --readFilesIn "$R1_FILE" "$R2_FILE" \
+        --readFilesIn "$r1" "$r2" \
         --readFilesCommand zcat \
-        --outFileNamePrefix "$ALIGN_DIR/${SAMPLE}_" \
+        --outFileNamePrefix "$SAMPLE_OUT_DIR/${sample}_" \
         --outSAMtype BAM SortedByCoordinate \
-        &>>"$LOG_FILE"
+        --outSAMunmapped Within \
+        --quantMode GeneCounts \
+        --twopassMode Basic \
+        >>"$LOG_FILE" 2>&1 &
+
+    ((CURRENT_JOBS++))
+    [ "$CURRENT_JOBS" -ge "$MAX_JOBS" ] && wait && CURRENT_JOBS=0
 done
 
-# ---------- END ----------
-end_time=$(date +%s)
-runtime=$((end_time - start_time))
+wait
 
-# shellcheck disable=SC2181
-if [ $? -eq 0 ]; then
-    echo "✅ STAR Alignment completed successfully in $((runtime / 60)) minutes and $((runtime % 60)) seconds."
-else
-    echo "❌ STAR Alignment failed. Check log: $LOG_FILE"
-fi
+# =============================
+# 3. Finalize
+# =============================
+END_TIME=$(date +%s)
+RUNTIME=$((END_TIME - START_TIME))
+RUNTIME_FMT=$(date -ud "@$RUNTIME" +'%H hrs %M min %S sec')
+
+echo -e "\n✅ All STAR alignments complete!"
+echo "Total Runtime: $RUNTIME_FMT"

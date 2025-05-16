@@ -1,38 +1,47 @@
 #!/bin/bash
+# run_star_index.sh — STAR genome indexing with GENCODE v38 annotation
 
-# ---------- CONFIG ----------
-SCRIPT_DIR="$(dirname "$(realpath "$0")")"
-# shellcheck disable=SC1091
-source "$SCRIPT_DIR/../../config/config.sh"
+# =============================
+# 1. Load Configuration
+# =============================
+# shellcheck disable=SC1090
+source ~/CrispAstro-Seq/config/config.sh
 
-# ---------- LOG SETUP ----------
-LOG_DIR="$SCRIPT_DIR/../../logs"
-mkdir -p "$LOG_DIR"
-LOG_FILE="$LOG_DIR/build_star_index_$(date +%Y%m%d_%H%M%S).log"
+# Start time tracking
+START_TIME=$(date +%s)
 
-# ---------- START ----------
-echo "🌟 Starting STAR index build at $(date)"
-echo "Saving log to $LOG_FILE"
-start_time=$(date +%s)
-
-# ---------- CREATE INDEX ----------
+# =============================
+# 2. Indexing Parameters
+# =============================
 mkdir -p "$STAR_INDEX_DIR"
-STAR --runThreadN 6 \
+mkdir -p "$LOG_DIR"
+LOG_FILE="$LOG_DIR/star_index_$(date +%Y%m%d_%H%M%S).log"
+
+echo -e "\n🚀 Starting STAR genome indexing..."
+echo "Reference genome : $GENOME_FASTA"
+echo "Annotation GTF   : $GENOME_GTF"
+echo "Index output dir : $STAR_INDEX_DIR"
+echo "Threads          : $THREADS"
+
+# =============================
+# 3. Run STAR Indexing
+# =============================
+STAR \
+    --runThreadN "$THREADS" \
     --runMode genomeGenerate \
     --genomeDir "$STAR_INDEX_DIR" \
     --genomeFastaFiles "$GENOME_FASTA" \
     --sjdbGTFfile "$GENOME_GTF" \
-    --sjdbOverhang 149 \
-    &>"$LOG_FILE"
+    --sjdbOverhang 100 \
+    >>"$LOG_FILE" 2>&1
 
-# ---------- END ----------
-end_time=$(date +%s)
-runtime=$((end_time - start_time))
+# =============================
+# 4. Finalize
+# =============================
+END_TIME=$(date +%s)
+RUNTIME=$((END_TIME - START_TIME))
+RUNTIME_FMT=$(date -ud "@$RUNTIME" +'%H hrs %M min %S sec')
 
-# shellcheck disable=SC2181
-if [ $? -eq 0 ]; then
-    echo "✅ STAR genome index built successfully in $((runtime / 60)) minutes and $((runtime % 60)) seconds."
-    echo "📁 Index stored in: $STAR_INDEX_DIR"
-else
-    echo "❌ STAR index build failed. Check log: $LOG_FILE"
-fi
+echo -e "\n✅ STAR indexing complete!"
+echo "Total Runtime: $RUNTIME_FMT"
+echo "Log: $LOG_FILE"
