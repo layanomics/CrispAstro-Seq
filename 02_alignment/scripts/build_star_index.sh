@@ -7,8 +7,13 @@
 # shellcheck disable=SC1090
 source ~/CrispAstro-Seq/config/config.sh
 
+# Optional: Force date to use local timezone (e.g., KSA)
+# shellcheck disable=SC2155
+export TZ=$(timedatectl | grep "Time zone" | awk '{print $3}')
+
 # Start time tracking
-START_TIME=$(date +%s)
+START_TIMESTAMP=$(date +%s)
+START_TIME_HUMAN=$(date +'%Y-%m-%d %H:%M:%S %Z (%:z)')
 
 # =============================
 # 2. Indexing Parameters
@@ -18,10 +23,11 @@ mkdir -p "$LOG_DIR"
 LOG_FILE="$LOG_DIR/star_index_$(date +%Y%m%d_%H%M%S).log"
 
 echo -e "\n🚀 Starting STAR genome indexing..."
-echo "Reference genome : $GENOME_FASTA"
-echo "Annotation GTF   : $GENOME_GTF"
-echo "Index output dir : $STAR_INDEX_DIR"
-echo "Threads          : $THREADS"
+echo "🕒 Started at      : $START_TIME_HUMAN"
+echo "Reference genome  : $GENOME_FASTA"
+echo "Annotation GTF    : $GENOME_GTF"
+echo "Index output dir  : $STAR_INDEX_DIR"
+echo "Threads           : $THREADS"
 
 # =============================
 # 3. Run STAR Indexing
@@ -38,10 +44,11 @@ STAR \
 # =============================
 # 4. Finalize
 # =============================
-END_TIME=$(date +%s)
-RUNTIME=$((END_TIME - START_TIME))
+END_TIMESTAMP=$(date +%s)
+RUNTIME=$((END_TIMESTAMP - START_TIMESTAMP))
 RUNTIME_FMT=$(date -ud "@$RUNTIME" +'%H hrs %M min %S sec')
 
 echo -e "\n✅ STAR indexing complete!"
-echo "Total Runtime: $RUNTIME_FMT"
-echo "Log: $LOG_FILE"
+echo "🕒 Finished at : $(date +'%Y-%m-%d %H:%M:%S %Z (%:z)')"
+echo "⏱️  Total Runtime: $RUNTIME_FMT"
+echo "📄 Log file     : $LOG_FILE"
