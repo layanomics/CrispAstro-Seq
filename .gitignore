@@ -41,6 +41,7 @@ env/
 00_data/counts/
 00_data/reference/
 00_data/metadata/
+00_data/paper_counts/
 
 # -----------------------------
 # Alignment / Mapping results
