@@ -1,10 +1,4 @@
-# Ignore output-heavy non-code files
+# ❌ Exclude HTML reports like MultiQC from GitHub language stats
 *.html linguist-documentation
 documentation/** linguist-documentation
 logs/** linguist-documentation
-*.ipynb linguist-documentation
-
-# Keep R files counted
-*.R linguist-language=R
-*.r linguist-language=R
-*.Rmd linguist-language=R
