@@ -1,5 +1,12 @@
-# Ignore output-heavy files from language stats
+# ❌ Exclude HTML reports from language stats (e.g. MultiQC)
 *.html linguist-documentation
-#*.ipynb linguist-documentation
-logs/** linguist-documentation
 documentation/** linguist-documentation
+logs/** linguist-documentation
+
+# ✅ Keep Jupyter Notebooks visible in language stats
+*.ipynb linguist-language=Jupyter\ Notebook
+
+# ✅ Ensure R scripts count properly
+*.R linguist-language=R
+*.r linguist-language=R
+*.Rmd linguist-language=R
