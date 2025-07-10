@@ -1,0 +1,5 @@
+# Ignore output-heavy files from language stats
+*.html linguist-documentation
+*.ipynb linguist-documentation
+logs/** linguist-documentation
+documentation/** linguist-documentation
