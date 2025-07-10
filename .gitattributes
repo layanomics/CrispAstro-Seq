@@ -2,6 +2,7 @@
 *.html linguist-documentation
 documentation/** linguist-documentation
 logs/** linguist-documentation
+*.ipynb linguist-documentation
 
 # Keep R files counted
 *.R linguist-language=R
