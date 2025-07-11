@@ -17,7 +17,8 @@
 ---
 
 ## 🧬 Workflow Overview
-![CrispAstro-Seq Flowchart](documentation/CrispAstro-seq-Flowchart.png)   
+
+<img src="documentation/CrispAstro-seq-Flowchart.png" alt="CrispAstro-Seq Flowchart" width="800"/>
 
 The pipeline is split into upstream (cloud) and downstream (local) stages:
 
@@ -110,6 +111,7 @@ bash scripts/merge_star_counts.sh
 ```
 
 In R (local):
+
 ```r
 dds <- DESeqDataSetFromMatrix(countData, colData, design=~condition)
 dds <- DESeq(dds)
@@ -140,6 +142,7 @@ plotCounts(dds, gene="ENSG00000132688", intgroup="condition")  # NES
 ## 🤝 Acknowledgments
 
 This project is part of my genomics data science portfolio, built to demonstrate hands-on expertise in:
+
 - CRISPR knockout transcriptomics
 - Reproducible cloud-scale RNA-seq analysis
 - GitHub documentation & scientific storytelling
