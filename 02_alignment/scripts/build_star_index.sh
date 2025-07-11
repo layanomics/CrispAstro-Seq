@@ -38,7 +38,7 @@ STAR \
     --genomeDir "$STAR_INDEX_DIR" \
     --genomeFastaFiles "$GENOME_FASTA" \
     --sjdbGTFfile "$GENOME_GTF" \
-    --sjdbOverhang 100 \
+    --sjdbOverhang 140 \
     >>"$LOG_FILE" 2>&1
 
 # =============================
