@@ -18,9 +18,13 @@
 
 ## 🧬 Workflow Overview
 
+<!-- 👇 blank line here -->
+
 <p align="center">
   <img src="documentation/CrispAstro-seq-Flowchart.png" alt="CrispAstro-Seq Flowchart" width="600">
 </p>
+
+<!-- 👇 and one here -->
 
 The pipeline is split into upstream (cloud) and downstream (local) stages:
 
@@ -28,9 +32,6 @@ The pipeline is split into upstream (cloud) and downstream (local) stages:
 📥 Download → 🧼 QC → 🧬 STAR Indexing → 🧲 Alignment
 → 📊 Count Merging → 📤 Transfer → 🧮 DESeq2 → 📈 Visualization
 ```
-
-📄 Full breakdown: [`docs/steps.md`](docs/steps.md)  
-📊 Workflow diagram: ![Pipeline](docs/crispastro_seq_pipeline.png)
 
 ---
 
