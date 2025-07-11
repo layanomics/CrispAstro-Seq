@@ -19,8 +19,9 @@
 ## 🧬 Workflow Overview
 
 <p align="center">
-  <img src="documentation/CrispAstro-seq-Flowchart.png" alt="CrispAstro-Seq Flowchart" width="600"/>
+  <img src="documentation/CrispAstro-seq-Flowchart.png" alt="CrispAstro-Seq Flowchart" width="600">
 </p>
+
 The pipeline is split into upstream (cloud) and downstream (local) stages:
 
 ```
