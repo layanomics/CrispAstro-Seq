@@ -21,7 +21,7 @@
 <!-- 👇 blank line here -->
 
 <p align="center">
-  <img src="documentation/CrispAstro-seq-Flowchart.png" alt="CrispAstro-Seq Flowchart" width="600">
+  <img src="documentation/CrispAstro-seq-Flowchart.png" alt="CrispAstro-Seq Flowchart" width="+800">
 </p>
 
 <!-- 👇 and one here -->
