@@ -42,6 +42,7 @@ env/
 00_data/reference/
 00_data/metadata/
 00_data/paper_counts/
+00_data/paper_published_data/aligned/*.tab
 
 # -----------------------------
 # Alignment / Mapping results
