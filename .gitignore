@@ -76,6 +76,10 @@ env/
 06_enrichment_analysis/results/
 07_visualization/figures/
 
+# Ignore STAR index and big output files
+02_alignment/results/*
+!02_alignment/results/.keep
+
 # FastQC output reports
 *_fastqc.html
 *_fastqc.zip
