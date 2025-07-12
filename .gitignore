@@ -31,6 +31,11 @@ Thumbs.db
 env/
 .conda/
 
+# Allow metadata files even though *.csv and *.txt are ignored
+!metadata/
+!metadata/*.csv
+!metadata/*.txt
+
 # -----------------------------
 # Bioinformatics: Large data folders
 # (Prevent uploading FASTQs, BAMs, GTFs, etc.)
@@ -40,7 +45,6 @@ env/
 00_data/aligned/
 00_data/counts/
 00_data/reference/
-00_data/metadata/
 00_data/paper_counts/
 00_data/paper_published_data/aligned/*.tab
 
