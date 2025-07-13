@@ -4,23 +4,35 @@
 # =============================
 # 1. Load Configuration
 # =============================
-# shellcheck disable=SC1090
-source ~/CrispAstro-Seq/config/config.sh
+# shellcheck disable=SC1091
+source "$HOME/CrispAstro-Seq/config/config.sh"
 
-# Optional: Force date to use local timezone (e.g., KSA)
-# shellcheck disable=SC2155
-export TZ=$(timedatectl | grep "Time zone" | awk '{print $3}')
+# ===========================================
+# Timestamp Block (KSA-standard logging)
+# ===========================================
 
-# Start time tracking
-START_TIMESTAMP=$(date +%s)
+# Set timezone to local machine setting (e.g., KSA)
+TZ=$(timedatectl | grep "Time zone" | awk '{print $3}')
+export TZ
+# Human-readable full timestamp (for console logs)
 START_TIME_HUMAN=$(date +'%Y-%m-%d %H:%M:%S %Z (%:z)')
+
+# Compact timestamp (for folder/file naming)
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+
+# =============================
+# Thread Detection (Self-contained)
+# =============================
+TOTAL_THREADS=$(nproc)
+THREADS=$TOTAL_THREADS
+echo -e "\n🧠 Threads available: $THREADS"
 
 # =============================
 # 2. Indexing Parameters
 # =============================
 mkdir -p "$STAR_INDEX_DIR"
 mkdir -p "$LOG_DIR"
-LOG_FILE="$LOG_DIR/star_index_$(date +%Y%m%d_%H%M%S).log"
+LOG_FILE="$LOG_DIR/star_index_${TIMESTAMP}.log"
 
 echo -e "\n🚀 Starting STAR genome indexing..."
 echo "🕒 Started at      : $START_TIME_HUMAN"
@@ -44,11 +56,12 @@ STAR \
 # =============================
 # 4. Finalize
 # =============================
+
 END_TIMESTAMP=$(date +%s)
 RUNTIME=$((END_TIMESTAMP - START_TIMESTAMP))
 RUNTIME_FMT=$(date -ud "@$RUNTIME" +'%H hrs %M min %S sec')
 
 echo -e "\n✅ STAR indexing complete!"
-echo "🕒 Finished at : $(date +'%Y-%m-%d %H:%M:%S %Z (%:z)')"
-echo "⏱️  Total Runtime: $RUNTIME_FMT"
+echo "🕒 Finished at     : $(date +'%Y-%m-%d %H:%M:%S %Z (%:z)')"
+echo "⏱️  Total Runtime  : $RUNTIME_FMT"
 echo "📄 Log file     : $LOG_FILE"

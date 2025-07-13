@@ -4,22 +4,31 @@
 # =============================
 # 1. Load Configuration
 # =============================
-# shellcheck disable=SC1090
-source ~/CrispAstro-Seq/config/config.sh
+# shellcheck disable=SC1091
+source "$HOME/CrispAstro-Seq/config/config.sh"
 
-# Force all time outputs to KSA timezone
-export TZ=Asia/Riyadh
+# ===========================================
+# Timestamp Block (KSA-standard logging)
+# ===========================================
 
-# Start time tracking
-START_TIMESTAMP=$(date +%s)
-# shellcheck disable=SC2034
+# Set timezone to local machine setting (e.g., KSA)
+TZ=$(timedatectl | grep "Time zone" | awk '{print $3}')
+export TZ
+# Human-readable full timestamp (for console logs)
 START_TIME_HUMAN=$(date +'%Y-%m-%d %H:%M:%S %Z (%:z)')
 
-# Override parallel logic for STAR alignment
-MAX_JOBS=1
-THREADS_PER_JOB=$THREADS
+# Compact timestamp (for folder/file naming)
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+
+# =============================
+# Thread Detection (Self-contained)
+# =============================
+TOTAL_THREADS=$(nproc)
+THREADS=$TOTAL_THREADS
+echo -e "\n🧠 Threads available: $THREADS"
 
 echo -e "\n✅ Config Loaded:"
+echo "🕒 Started at      : $START_TIME_HUMAN"
 echo "- MACHINE TYPE             : Virtual Machine / Cloud Environment"
 echo "- TOTAL CPU THREADS        : $THREADS"
 echo "- MAX PARALLEL JOBS        : $MAX_JOBS"
@@ -39,7 +48,8 @@ for r1 in "$TRIMMED_DIR"/*/*_clean_R1.fastq.gz; do
     r2="$TRIMMED_DIR/$sample/${sample}_clean_R2.fastq.gz"
 
     if [[ ! -f "$r2" || ! -s "$r1" || ! -s "$r2" ]]; then
-        echo "❌ Skipping $sample — missing or empty reads" | tee -a "$LOG_DIR/star_align_errors.log"
+        echo "❌ Skipping $sample — missing or empty reads" | tee -a "$LOG_DIR/star_align_errors_${TIMESTAMP}.log"
+
         continue
     fi
 
@@ -47,7 +57,7 @@ for r1 in "$TRIMMED_DIR"/*/*_clean_R1.fastq.gz; do
 
     SAMPLE_OUT_DIR="$ALIGN_DIR/$sample"
     mkdir -p "$SAMPLE_OUT_DIR"
-    LOG_FILE="$LOG_DIR/star_align_${sample}.log"
+    LOG_FILE="$LOG_DIR/star_align_${sample}_${TIMESTAMP}.log"
 
     STAR \
         --runThreadN "$THREADS_PER_JOB" \
@@ -74,10 +84,12 @@ done
 # =============================
 # 3. Finalize
 # =============================
+
 END_TIMESTAMP=$(date +%s)
 RUNTIME=$((END_TIMESTAMP - START_TIMESTAMP))
 RUNTIME_FMT=$(date -ud "@$RUNTIME" +'%H hrs %M min %S sec')
 
 echo -e "\n✅ All STAR alignments complete!"
-echo "🕒 Finished at: $(date +'%Y-%m-%d %H:%M:%S %Z (%:z)')"
-echo "⏱️  Total Runtime: $RUNTIME_FMT"
+echo "🕒 Finished at     : $(date +'%Y-%m-%d %H:%M:%S %Z (%:z)')"
+echo "⏱️  Total Runtime  : $RUNTIME_FMT"
+echo "📄 Log file     : $LOG_FILE"

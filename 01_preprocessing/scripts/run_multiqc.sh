@@ -57,4 +57,4 @@ RUNTIME=$((END_TIME - START_TIME))
 RUNTIME_FMT=$(date -ud "@$RUNTIME" +'%H hrs %M min %S sec')
 
 echo "✅ MultiQC Report saved to: $OUT_DIR"
-echo "Total Runtime: $RUNTIME_FMT"
+echo -e "\n⏱️  Total Runtime: $RUNTIME_FMT"
