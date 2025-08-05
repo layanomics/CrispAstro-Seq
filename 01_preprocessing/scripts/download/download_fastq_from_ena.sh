@@ -95,11 +95,9 @@ for SRA in "${SRA_IDS[@]}"; do
 
         while [[ $ATTEMPT -le $MAX_TRIES ]]; do
           echo "🌐 Attempt $ATTEMPT: Downloading $FILE..." | tee -a "$LOG_FILE"
-
           if wget -q --show-progress --progress=bar:force -c "$URL" -O "$DEST"; then
             echo "📦 Downloaded: $FILE" | tee -a "$LOG_FILE"
             echo "🔍 Verifying..." | tee -a "$LOG_FILE"
-
             if gunzip -t "$DEST" &>/dev/null; then
               echo "✅ Verified: $FILE" | tee -a "$LOG_FILE"
               SUCCESS=1
@@ -109,11 +107,9 @@ for SRA in "${SRA_IDS[@]}"; do
               echo "❌ Corrupted: $FILE — retrying..." | tee -a "$LOG_FILE"
               rm -f "$DEST"
             fi
-
           else
             echo "⚠️  wget failed: $FILE" | tee -a "$LOG_FILE"
           fi
-
           ((ATTEMPT++))
           sleep 2
         done
@@ -121,25 +117,19 @@ for SRA in "${SRA_IDS[@]}"; do
         if [[ $SUCCESS -ne 1 ]]; then
           echo "🚫 Failed after $MAX_TRIES attempts: $FILE" | tee -a "$LOG_FILE"
         fi
-
       else
         echo "✅ Already downloaded and verified: $FILE" | tee -a "$LOG_FILE"
       fi
     ) &
 
     ((JOB_COUNT++))
-
-    # ✅ Real fix to prevent early prompt — handles both batch and final job
-    if (( JOB_COUNT % MAX_JOBS == 0 )) || (( JOB_COUNT == ${#SRA_IDS[@]} * 2 )); then
+    if (( JOB_COUNT % MAX_JOBS == 0 )); then
       wait
     fi
+  done
+done
 
-  done  # End of READ loop
-
-done  # End of SRA loop
-
-wait  # 🔚 Final batch to ensure all background jobs finish
-
+wait  # 🔚 Final batch
 
 # =============================
 # ✅ Final Summary & Runtime
