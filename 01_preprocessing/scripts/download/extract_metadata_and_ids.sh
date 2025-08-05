@@ -12,8 +12,9 @@ set -euo pipefail
 # ==============================================
 # 📌 Load shared configuration and utilities
 # ==============================================
-source "$(dirname "$0")/../../config/config.sh"
-source "$(dirname "$0")/../../config/utils.sh"
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../../../.. && pwd)"
+source "$PROJECT_DIR/config/config.sh"
+source "$PROJECT_DIR/config/utils.sh"
 
 # =============================
 # 🕒 Timestamp Initialization
