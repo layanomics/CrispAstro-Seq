@@ -1,67 +1,95 @@
 #!/bin/bash
-# run_star_index.sh — STAR genome indexing with GENCODE v38 annotation
+set -euo pipefail
+######################################################################
+# 🧬 CrispAstro-Seq Pipeline
+# Script        : build_star_index.sh
+# Description   : Build STAR genome index (GRCh38.p12) using GENCODE v38 GTF annotation 
+# Author        : Layan Essam
+# Tool Version  : 2.6.0a
+# Last Updated  : July 2025
+######################################################################
+
 
 # =============================
-# 1. Load Configuration
+# ⚙️ Load Configuration
 # =============================
-# shellcheck disable=SC1091
 source "$HOME/CrispAstro-Seq/config/config.sh"
-
-# ===========================================
-# Timestamp Block (KSA-standard logging)
-# ===========================================
-
-# Set timezone to local machine setting (e.g., KSA)
-TZ=$(timedatectl | grep "Time zone" | awk '{print $3}')
-export TZ
-# Human-readable full timestamp (for console logs)
-START_TIME_HUMAN=$(date +'%Y-%m-%d %H:%M:%S %Z (%:z)')
-
-# Compact timestamp (for folder/file naming)
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+source "$PROJECT_DIR/config/utils.sh"
 
 # =============================
-# Thread Detection (Self-contained)
+# 🔧 Tool Version Check
 # =============================
-TOTAL_THREADS=$(nproc)
-THREADS=$TOTAL_THREADS
-echo -e "\n🧠 Threads available: $THREADS"
+check_tool_version STAR
 
 # =============================
-# 2. Indexing Parameters
+# 🕒 Timestamp Initialization
 # =============================
-mkdir -p "$STAR_INDEX_DIR"
-mkdir -p "$LOG_DIR"
-LOG_FILE="$LOG_DIR/star_index_${TIMESTAMP}.log"
-
-echo -e "\n🚀 Starting STAR genome indexing..."
-echo "🕒 Started at      : $START_TIME_HUMAN"
-echo "Reference genome  : $GENOME_FASTA"
-echo "Annotation GTF    : $GENOME_GTF"
-echo "Index output dir  : $STAR_INDEX_DIR"
-echo "Threads           : $THREADS"
+initialize_timestamps
 
 # =============================
-# 3. Run STAR Indexing
+# 📁 Path & Directory Setup
 # =============================
+mkdir -p "$STAR_INDEX_DIR" "$ALIGN_LOG_DIR"
+LOG_FILE="$ALIGN_LOG_DIR/star_index_${TIMESTAMP}.log"
+
+# =============================
+# 🧠 Thread Detection (Self-contained)
+# =============================
+TOTAL_THREADS=$(nproc); THREADS=$TOTAL_THREADS
+
+# =============================
+#📝 Session Log Header
+# =============================
+{
+  echo ""
+  echo "==================== 🧬 STAR GENOME INDEXING ===================="
+  echo "⚙️  STAR CONFIGURATION"
+  echo "🔢 STAR Version         : $TOOL_VERSION"
+  echo "🧠 Threads              : $THREADS"
+  echo ""
+  echo "📋 STAR genome indexing setup:"
+  echo "🕒 Script launched at   : $START_TIME_KSA | UTC: $START_TIME_UTC"
+  echo "🧬 Reference genome     : $GENOME_FASTA"
+  echo "📘 Annotation GTF       : $GENOME_GTF"
+  echo "📁 Output directory     : $STAR_INDEX_DIR"
+  echo "📄 Logging to           : $LOG_FILE"
+  echo "==============================================================="
+} | tee -a "$LOG_FILE"
+
+# =============================
+# 🚀 Run STAR Indexing
+# =============================
+echo  "🚀 Starting STAR genome indexing..."
+
+START_TIMESTAMP=$(date +%s)  
 STAR \
     --runThreadN "$THREADS" \
     --runMode genomeGenerate \
     --genomeDir "$STAR_INDEX_DIR" \
     --genomeFastaFiles "$GENOME_FASTA" \
     --sjdbGTFfile "$GENOME_GTF" \
-    --sjdbOverhang 140 \
     >>"$LOG_FILE" 2>&1
 
 # =============================
-# 4. Finalize
+# ✅ Index Output Validation
 # =============================
+if compgen -G "$STAR_INDEX_DIR/*" > /dev/null; then
+  echo "✅ Index files successfully generated." | tee -a "$LOG_FILE"
+else
+  echo "❌ Indexing failed: No files found in $STAR_INDEX_DIR" | tee -a "$LOG_FILE"
+  exit 1
+fi
 
-END_TIMESTAMP=$(date +%s)
-RUNTIME=$((END_TIMESTAMP - START_TIMESTAMP))
-RUNTIME_FMT=$(date -ud "@$RUNTIME" +'%H hrs %M min %S sec')
+# =============================
+# Finalize and Runtime Summary
+# =============================
+log_runtime
 
-echo -e "\n✅ STAR indexing complete!"
-echo "🕒 Finished at     : $(date +'%Y-%m-%d %H:%M:%S %Z (%:z)')"
-echo "⏱️  Total Runtime  : $RUNTIME_FMT"
-echo "📄 Log file     : $LOG_FILE"
+{
+  echo ""
+  echo "=================== ✅ STAR INDEX COMPLETE ==================="
+  echo "✅ STAR indexing completed successfully!"
+  print_runtime_summary
+  echo "📄 Log file saved to : $LOG_FILE"
+  echo "=============================================================="
+} | tee -a "$LOG_FILE"
