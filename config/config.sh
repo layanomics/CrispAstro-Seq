@@ -1,41 +1,60 @@
 #!/bin/bash
-# config.sh — Central configuration for CrispAstro-Seq project
-# Used by all preprocessing and analysis scripts for consistency
-# shellcheck disable=SC2034
+# ===============================================================
+# 📦 CrispAstro-Seq Central Configuration File
+# Author: Layan Essam
+# Last Updated: July 2025
+# Purpose: Central configuration for CrispAstro-Seq pipeline-Define consistent paths and references across scripts 
+# ===============================================================
 
-# ============================================================
-# 1. Define Project Directory Structure
-# ============================================================
-
-# Main project directory (root of all paths)
-PROJECT_DIR="$HOME/CrispAstro-Seq"
-
-# Raw and processed FASTQ data
+# ========================================
+# 📁 Main Project Directory
+# ========================================
+CONFIG_PATH="$(realpath "${BASH_SOURCE[0]}")"
+PROJECT_DIR="$(realpath "$(dirname "$CONFIG_PATH")/..")"
+# ========================================
+# 📥 STEP 1: FASTQC on RAW READS
+# ========================================
 RAW_DIR="$PROJECT_DIR/00_data/raw"
-TRIMMED_DIR="$PROJECT_DIR/00_data/trimmed"
-ALIGN_DIR="$PROJECT_DIR/00_data/aligned"
-COUNTS_DIR="$PROJECT_DIR/00_data/counts"
 REFERENCE_DIR="$PROJECT_DIR/00_data/reference"
-METADATA_DIR="$PROJECT_DIR/00_data/metadata"
+PREPROC_RESULTS_DIR="$PROJECT_DIR/01_preprocessing/results"
+FASTQC_RAW_DIR="$PREPROC_RESULTS_DIR/fastqc/raw"
+PREPROC_LOG_DIR="$PROJECT_DIR/01_preprocessing/logs"
 
-# Quality control and downstream visualization
-QC_DIR="$PROJECT_DIR/01_preprocessing/results"
-VISUALIZATION_DIR="$PROJECT_DIR/07_visualization/figures"
+# ========================================
+# ✂️ STEP 2: CUTADAPT TRIMMING
+# ========================================
+TRIMMED_DIR="$PROJECT_DIR/00_data/trimmed"
+CUTADAPT_LOG_DIR="$PREPROC_RESULTS_DIR/cutadapt"
 
-# Configs, conda environments, and logs
-CONFIG_DIR="$PROJECT_DIR/config"
-ENV_DIR="$PROJECT_DIR/environment"
-LOG_DIR="$PROJECT_DIR/logs"
+# ========================================
+# 📊 STEP 3: FASTQC on TRIMMED READS
+# ========================================
+FASTQC_TRIMMED_DIR="$PREPROC_RESULTS_DIR/fastqc/trimmed"
 
-# ============================================================
-# 2. Reference Files
-# ============================================================
 
-# Genome FASTA and annotation GTF used in STAR, featureCounts, etc.
+# ========================================
+# 🧪 STEP 4: MULTIQC REPORTING
+# ========================================
+MULTIQC_RAW_DIR="$PREPROC_RESULTS_DIR/multiqc/raw" 
+MULTIQC_TRIMMED_DIR="$PREPROC_RESULTS_DIR/multiqc/trimmed"
+
+# ========================================
+# 🧬 STEP 5: STAR GENOME INDEXING
+# ========================================
 GENOME_FASTA="$REFERENCE_DIR/GRCh38.primary_assembly.genome.fa"
 GENOME_GTF="$REFERENCE_DIR/gencode.v38.annotation.gtf"
-
-# Directory to hold STAR index files
 STAR_INDEX_DIR="$REFERENCE_DIR/star_index"
 
-# ============================================================
+# ========================================
+# 🔭 STEP 6: STAR ALIGNMENT
+# ========================================
+ALIGN_DIR="$PROJECT_DIR/00_data/aligned"
+ALIGN_LOG_DIR="$PROJECT_DIR/02_alignment/logs"
+
+# ========================================
+# 🧾 EXTRA: METADATA & FEATURE COUNTS
+# ========================================
+COUNTS_DIR="$PROJECT_DIR/00_data/counts"
+METADATA_DIR="$PROJECT_DIR/00_data/metadata"
+
+# ========================================
