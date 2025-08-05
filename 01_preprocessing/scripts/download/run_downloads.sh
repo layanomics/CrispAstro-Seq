@@ -1,69 +1,92 @@
 #!/bin/bash
 set -euo pipefail
 
-# 📁 Load config and utils
-source "$(dirname "$0")/../../config/config.sh"
-source "$(dirname "$0")/../../config/utils.sh"
+######################################################################
+# 🧬 CrispAstro-Seq Pipeline
+# Script        : run_downloads.sh
+# Description   : Orchestrate parallel ENA FASTQ downloads using joblist
+# Author        : Layan Essam
+# Last Updated  : August 2025
+######################################################################
 
-# 🧱 Setup output folders
+# =============================
+# 📦 Load Configuration & Utils
+# =============================
+SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../../../../config/config.sh"
+source "$SCRIPT_DIR/../../../../config/utils.sh"
+
+# =============================
+# 🕒 Timestamp Initialization
+# =============================
+initialize_timestamps
+
+# =============================
+# 📁 Path Setup
+# =============================
 mkdir -p "$RAW_DIR" "$PREPROC_LOG_DIR"
 JOBLIST="$METADATA_DIR/joblist.txt"
-LOG_FILE="$PREPROC_LOG_DIR/download_summary.log"
+LOG_FILE="$PREPROC_LOG_DIR/download_summary_${TIMESTAMP}.log"
 
+# =============================
 # ⚙️ Determine max jobs dynamically (cap at 6)
+# =============================
 TOTAL_CORES=$(nproc)
 MAX_JOBS=$(( TOTAL_CORES / 2 ))
 [[ $MAX_JOBS -lt 1 ]] && MAX_JOBS=1
 [[ $MAX_JOBS -gt 6 ]] && MAX_JOBS=6
 
+# =============================
 # 📝 Generate download task list
 bash "$(dirname "$0")/make_joblist.sh"
 
+#=============================
+# 📝 Session Log Header
+# =============================
+{
+  echo ""
+  echo "====================== 🌍 PARALLEL DOWNLOAD ======================="
+  echo "📄 Joblist              : $JOBLIST"
+  echo "🧵 Max Parallel Jobs    : $MAX_JOBS"
+  echo "📦 Output Directory     : $RAW_DIR"
+  echo "🕒 Script Launched at   : $START_TIME_KSA | UTC: $START_TIME_UTC"
+  echo "📓 Log File             : $LOG_FILE"
+  echo "==================================================================="
+} | tee -a "$LOG_FILE"
+#=============================
 # 🚀 Launch parallel downloads
-echo "====================== 🌍 PARALLEL DOWNLOAD ======================="
-echo "📄 Joblist        : $JOBLIST"
-echo "🧵 Max Jobs       : $MAX_JOBS"
-echo "📦 Output Folder  : $RAW_DIR"
-echo "📓 Log File       : $LOG_FILE"
-echo "==================================================================="
+# =============================
+START_TIMESTAMP=$(date +%s)
 
 parallel -j "$MAX_JOBS" \
   --retries 3 \
   --tag --line-buffer \
   "$(dirname "$0")/download_one.sh" {1} {2} :::: "$JOBLIST" \
-| tee "$LOG_FILE"
+| tee -a "$LOG_FILE"
 
-#!/bin/bash
-set -euo pipefail
+# =============================
+# ✅ Final Summary & Runtime
+# =============================
+SUCCESS_COUNT=$(find "$RAW_DIR" -name "*.fastq.gz" -exec bash -c 'gunzip -t "{}" &>/dev/null && echo OK' \; | wc -l)
+EXPECTED_COUNT=$(( $(wc -l < "$JOBLIST") ))
 
-# 📁 Load config and utils
-source "$(dirname "$0")/../../config/config.sh"
-source "$(dirname "$0")/../../config/utils.sh"
+{
+  echo ""
+  echo "====================== ✅ DOWNLOAD COMPLETED ======================"
+  echo "📂 Output directory     : $RAW_DIR"
+  report_runtime
+  echo "🎯 Successful files     : $SUCCESS_COUNT of $EXPECTED_COUNT"
 
-# 🧱 Setup output folders
-mkdir -p "$RAW_DIR" "$PREPROC_LOG_DIR"
-JOBLIST="$METADATA_DIR/joblist.txt"
-LOG_FILE="$PREPROC_LOG_DIR/download_summary.log"
+  if [[ "$SUCCESS_COUNT" -eq "$EXPECTED_COUNT" ]]; then
+    echo "✅ Step completed successfully: run_downloads.sh"
+  else
+    echo "⚠️  Step completed with errors: $((EXPECTED_COUNT - SUCCESS_COUNT)) failed download(s)"
+  fi
 
-# ⚙️ Determine max jobs dynamically (cap at 6)
-TOTAL_CORES=$(nproc)
-MAX_JOBS=$(( TOTAL_CORES / 2 ))
-[[ $MAX_JOBS -lt 1 ]] && MAX_JOBS=1
-[[ $MAX_JOBS -gt 6 ]] && MAX_JOBS=6
+  echo "==================================================================="
+} | tee -a "$LOG_FILE"
 
-# 📝 Generate download task list
-bash "$(dirname "$0")/make_joblist.sh"
 
-# 🚀 Launch parallel downloads
-echo "====================== 🌍 PARALLEL DOWNLOAD ======================="
-echo "📄 Joblist        : $JOBLIST"
-echo "🧵 Max Jobs       : $MAX_JOBS"
-echo "📦 Output Folder  : $RAW_DIR"
-echo "📓 Log File       : $LOG_FILE"
-echo "==================================================================="
 
-parallel -j "$MAX_JOBS" \
-  --retries 3 \
-  --tag --line-buffer \
-  "$(dirname "$0")/download_one.sh" {1} {2} :::: "$JOBLIST" \
-| tee "$LOG_FILE"
+
+
